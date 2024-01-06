@@ -1,0 +1,26 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Node js app
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.SSH_HOST}}
+          key: ${{secrets.SSH_KEY}}
+          username: ${{ secrets.SSH_USERNAME }}
+          script: |
+            set -e
+            cd /home/root/
+            if [ -d "cicd_backend/.git" ]; then
+              cd cicd_backend
+              git pull origin master || (echo "Failed to pull existing repository" && exit 1)
+            else
+              git clone https://github.com/Mohdniyam/cicd_backend.git || (echo "Failed to clone repository" && exit 1)
+            fi
+            echo 'Deployment successful to DigitalOcean'
